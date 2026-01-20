@@ -5,10 +5,11 @@ import { useSettingsStore } from '../../stores/settingsStore';
 import { exportGPX } from '../../lib/gpx/exporter';
 import { parseKML, exportKML } from '../../lib/formats/kml';
 import { getNextTrackColor } from '../../lib/gpx/types';
+import { calculateBoundingBox, mergeBoundingBoxes } from '../../lib/gpx/calculations';
 
 export function Toolbar() {
   const { document, clear, selection, deleteTrack, deleteRoute, deleteWaypoint, undo, redo, canUndo, canRedo, cutSelected, copySelected, paste, hasClipboard } = useGpxStore();
-  const { editorMode, setEditorMode, setShowSettingsDialog, setShowCoordinateDialog, setShowExportDialog, setStatusMessage } = useUIStore();
+  const { editorMode, setEditorMode, setShowSettingsDialog, setShowCoordinateDialog, setShowExportDialog, setStatusMessage, setZoomTarget } = useUIStore();
   const { confirmDelete, recentFiles, addRecentFile, clearRecentFiles } = useSettingsStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showRecentFiles, setShowRecentFiles] = useState(false);
@@ -54,14 +55,29 @@ export function Toolbar() {
 
         if (i === 0 && !hasExistingData) {
           // First file with no existing data - load as primary
-          // Assign a consistent color to waypoints from this file
+          // Assign a consistent color to ALL items from this file (tracks, routes, waypoints)
           const fileColor = doc.tracks[0]?.color || doc.routes[0]?.color || getNextTrackColor();
+          const coloredTracks = doc.tracks.map(trk => ({
+            ...trk,
+            color: fileColor,
+          }));
+          const coloredRoutes = doc.routes.map(rte => ({
+            ...rte,
+            color: fileColor,
+          }));
           const coloredWaypoints = doc.waypoints.map(wpt => ({
             ...wpt,
-            color: wpt.color || fileColor,
+            color: fileColor,
           }));
           useGpxStore.setState({
-            document: { ...doc, waypoints: coloredWaypoints, filename: file.name, modified: false },
+            document: {
+              ...doc,
+              tracks: coloredTracks,
+              routes: coloredRoutes,
+              waypoints: coloredWaypoints,
+              filename: file.name,
+              modified: false,
+            },
             selection: [],
           });
           totalTracks += doc.tracks.length;
@@ -90,6 +106,44 @@ export function Toolbar() {
 
       const filesText = loadedFiles === 1 ? fileArray[0].name : `${loadedFiles} files`;
       setStatusMessage(`Loaded ${filesText}: ${parts.join(', ')}`);
+
+      // Zoom to the loaded data
+      const currentDoc = useGpxStore.getState().document;
+      let combinedBounds = { north: 0, south: 0, east: 0, west: 0, valid: false };
+
+      // Calculate bounds from all tracks
+      for (const track of currentDoc.tracks) {
+        for (const segment of track.segments) {
+          if (segment.points.length > 0) {
+            const segBounds = calculateBoundingBox(segment.points);
+            combinedBounds = mergeBoundingBoxes(combinedBounds, segBounds);
+          }
+        }
+      }
+
+      // Calculate bounds from all routes
+      for (const route of currentDoc.routes) {
+        if (route.points.length > 0) {
+          const rteBounds = calculateBoundingBox(route.points);
+          combinedBounds = mergeBoundingBoxes(combinedBounds, rteBounds);
+        }
+      }
+
+      // Calculate bounds from all waypoints
+      if (currentDoc.waypoints.length > 0) {
+        const wptBounds = calculateBoundingBox(currentDoc.waypoints);
+        combinedBounds = mergeBoundingBoxes(combinedBounds, wptBounds);
+      }
+
+      // Zoom to the combined bounds
+      if (combinedBounds.valid) {
+        setZoomTarget({
+          north: combinedBounds.north,
+          south: combinedBounds.south,
+          east: combinedBounds.east,
+          west: combinedBounds.west,
+        });
+      }
     }
 
     // Reset input so same file can be selected again
