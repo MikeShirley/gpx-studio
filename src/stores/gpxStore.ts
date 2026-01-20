@@ -115,6 +115,9 @@ export const useGpxStore = create<GPXState>((set, get) => ({
     // Get a unique color for this batch of imports (all items from this file share a color)
     const batchColor = getNextTrackColor();
 
+    // Use the source filename for grouping items from the same file
+    const sourceFile = sourceName || 'Imported File';
+
     // Generate new IDs for all incoming items to avoid conflicts
     // Always assign the batch color so items from different files have different colors
     const newTracks: GPXTrack[] = incomingDoc.tracks.map(track => ({
@@ -122,6 +125,7 @@ export const useGpxStore = create<GPXState>((set, get) => ({
       id: generateId(),
       name: track.name || sourceName || 'Imported Track',
       color: batchColor,
+      sourceFile,
       segments: track.segments.map(seg => ({
         ...seg,
         id: generateId(),
@@ -134,6 +138,7 @@ export const useGpxStore = create<GPXState>((set, get) => ({
       id: generateId(),
       name: route.name || sourceName || 'Imported Route',
       color: batchColor,
+      sourceFile,
       points: route.points.map(pt => ({ ...pt, id: generateId() })),
     }));
 
@@ -141,6 +146,7 @@ export const useGpxStore = create<GPXState>((set, get) => ({
       ...wpt,
       id: generateId(),
       color: batchColor,
+      sourceFile,
     }));
 
     set({

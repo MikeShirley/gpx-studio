@@ -495,31 +495,35 @@ All features from RideLeader, organized by implementation phase.
 
 ## UI Layout
 
+**Sidebar Tree Structure (File-Based Hierarchy):**
+Items are grouped by source file, not by type. Each file shows its track with expandable waypoints underneath.
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │ [Logo] GPX Editor    [New][Open][Save]  [Undo][Redo]  [Settings]    │
 ├──────────────┬──────────────────────────────────────────────────────┤
 │              │                                                       │
 │  Tree View   │                                                       │
-│              │                    Map View                           │
-│  □ Tracks    │                                                       │
-│    □ Track 1 │                 (Leaflet Map)                         │
-│      □ Seg 1 │                                                       │
-│    □ Track 2 │                                                       │
-│  □ Routes    │                                                       │
-│    □ Route 1 │                                                       │
-│  □ Waypoints │                                                       │
-│    □ WP 1    │                                                       │
-│    □ WP 2    ├──────────────────────────────────────────────────────┤
-│              │  [Editor] [Statistics] [Chart] [Points]               │
-├──────────────┤  ┌────────────────────────────────────────────────┐  │
-│ Properties   │  │ Distance: 45.2 km    Total Climb: 1,234 m      │  │
-│              │  │ Time: 3:45:00        Max Speed: 45.2 km/h      │  │
-│ Name: [    ] │  │ Moving: 2:30:00      Avg Speed: 18.1 km/h      │  │
-│ Desc: [    ] │  └────────────────────────────────────────────────┘  │
+│  (by file)   │                    Map View                           │
+│              │                                                       │
+│  ▼ □ file1.gpx                   (Leaflet Map)                       │
+│    ─ Track 1 │                                                       │
+│    ▼ Waypoints (15)                                                  │
+│      □ WP 1  │                                                       │
+│      □ WP 2  │                                                       │
+│      □ ...   │                                                       │
+│  ▼ □ file2.gpx ─────────────────────────────────────────────────────┤
+│    ─ Track 2 │  [Statistics] [Elevation] [Points]                    │
+│    ▶ Waypoints (8)  ┌────────────────────────────────────────────┐  │
+│              │      │ Distance: 45.2 km    Elevation Gain: 1,234m│  │
+├──────────────┤      │ Time: 3:45:00        Max Speed: 45.2 km/h  │  │
+│ Properties   │      └────────────────────────────────────────────┘  │
+│ Name: [    ] │                                                       │
 │ Color: [█]   │                                                       │
 └──────────────┴──────────────────────────────────────────────────────┘
 ```
+
+**Reference:** See RideLeader/OHVtrails.net style where each GPX file is a parent node containing its track and a collapsible "Waypoints (N)" child node.
 
 ## Keyboard Shortcuts
 

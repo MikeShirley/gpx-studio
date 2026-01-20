@@ -33,6 +33,7 @@ export interface GPXWaypoint {
   // UI/display state
   enabled: boolean;
   color?: string;  // Optional color for visual distinction
+  sourceFile?: string;  // Track which file this item came from
 }
 
 export interface GPXTrackSegment {
@@ -56,6 +57,7 @@ export interface GPXTrack {
   color: string;
   enabled: boolean;
   expanded: boolean;
+  sourceFile?: string;  // Track which file this item came from
 }
 
 export interface GPXRoute {
@@ -72,6 +74,7 @@ export interface GPXRoute {
   // Display properties
   color: string;
   enabled: boolean;
+  sourceFile?: string;  // Track which file this item came from
 }
 
 export interface GPXMetadata {
