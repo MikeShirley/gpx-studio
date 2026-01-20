@@ -272,10 +272,12 @@ export function Sidebar() {
                 const pointCount = trk.segments.reduce((acc, seg) => acc + seg.points.length, 0);
                 const distance = calculateTrackDistance(trk);
                 const tooltip = `${trk.name || 'Track'}\nDistance: ${formatDistance(distance)}\nPoints: ${pointCount}\nSegments: ${trk.segments.length}`;
-                // Track icon: solid colored line
+                // Track icon: solid colored line - use yellow when selected to match map
+                const isTrackSelected = selection.some(s => s.type === 'track' && s.id === trk.id);
+                const trackIconColor = isTrackSelected ? '#FFFF00' : trk.color;
                 const trackIcon = (
                   <div className="w-4 h-4 flex items-center justify-center">
-                    <div className="w-4 h-1 rounded" style={{ backgroundColor: trk.color }} />
+                    <div className="w-4 h-1 rounded" style={{ backgroundColor: trackIconColor }} />
                   </div>
                 );
                 return (
@@ -302,9 +304,13 @@ export function Sidebar() {
                     {trk.expanded && trk.segments.length > 1 && (
                       <div className="ml-4">
                         {trk.segments.map((seg, i) => {
+                          const isSegSelected = selection.some(
+                            s => s.type === 'segment' && s.trackId === trk.id && s.segmentId === seg.id
+                          );
+                          const segIconColor = isSegSelected ? '#FFFF00' : trk.color;
                           const segIcon = (
                             <div className="w-4 h-4 flex items-center justify-center">
-                              <div className="w-3 h-0.5 rounded" style={{ backgroundColor: trk.color }} />
+                              <div className="w-3 h-0.5 rounded" style={{ backgroundColor: segIconColor }} />
                             </div>
                           );
                           return (
@@ -332,13 +338,15 @@ export function Sidebar() {
               {group.routes.map((rte) => {
                 const distance = calculateRouteDistance(rte);
                 const routeTooltip = `${rte.name || 'Route'}\nDistance: ${formatDistance(distance)}\nPoints: ${rte.points.length}`;
-                // Route icon: dashed colored line
+                // Route icon: dashed colored line - use yellow when selected to match map
+                const isRouteSelected = selection.some(s => s.type === 'route' && s.id === rte.id);
+                const routeIconColor = isRouteSelected ? '#FFFF00' : rte.color;
                 const routeIcon = (
                   <div className="w-4 h-4 flex items-center justify-center">
                     <div
                       className="w-4 h-1 rounded"
                       style={{
-                        backgroundImage: `repeating-linear-gradient(90deg, ${rte.color} 0px, ${rte.color} 3px, transparent 3px, transparent 5px)`,
+                        backgroundImage: `repeating-linear-gradient(90deg, ${routeIconColor} 0px, ${routeIconColor} 3px, transparent 3px, transparent 5px)`,
                       }}
                     />
                   </div>
@@ -369,28 +377,34 @@ export function Sidebar() {
               {hasWaypoints && (
                 <div className="ml-2">
                   {/* Waypoints header - clickable to expand/collapse */}
-                  <div
-                    className="flex items-center gap-1 px-2 py-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded"
-                    onClick={() => toggleWaypointsExpanded(group.sourceFile)}
-                  >
-                    <span className="text-gray-500 text-xs">
-                      {waypointsExpanded ? '▼' : '▶'}
-                    </span>
-                    <div className="w-4 h-4 flex items-center justify-center">
+                  {/* Use the first waypoint's color for the header icon */}
+                  {(() => {
+                    const headerWptColor = group.waypoints[0]?.color || '#3B82F6';
+                    return (
                       <div
-                        className="w-2.5 h-2.5 border"
-                        style={{
-                          backgroundColor: group.color,
-                          borderColor: group.color,
-                          borderRadius: '50% 50% 50% 0',
-                          transform: 'rotate(-45deg)',
-                        }}
-                      />
-                    </div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">
-                      Waypoints ({group.waypoints.length})
-                    </span>
-                  </div>
+                        className="flex items-center gap-1 px-2 py-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded"
+                        onClick={() => toggleWaypointsExpanded(group.sourceFile)}
+                      >
+                        <span className="text-gray-500 text-xs">
+                          {waypointsExpanded ? '▼' : '▶'}
+                        </span>
+                        <div className="w-4 h-4 flex items-center justify-center">
+                          <div
+                            className="w-2.5 h-2.5 border"
+                            style={{
+                              backgroundColor: headerWptColor,
+                              borderColor: headerWptColor,
+                              borderRadius: '50% 50% 50% 0',
+                              transform: 'rotate(-45deg)',
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">
+                          Waypoints ({group.waypoints.length})
+                        </span>
+                      </div>
+                    );
+                  })()}
 
                   {/* Individual waypoints (when expanded) */}
                   {waypointsExpanded && (
