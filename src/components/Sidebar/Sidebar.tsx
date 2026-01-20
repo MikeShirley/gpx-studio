@@ -112,7 +112,10 @@ export function Sidebar() {
   useEffect(() => {
     if (selection.length === 1 && scrollContainerRef.current) {
       const selectedItem = selection[0];
-      const itemId = `${selectedItem.type}-${selectedItem.id}`;
+      // Handle different selection types (segment has trackId/segmentId, others have id)
+      const itemId = selectedItem.type === 'segment'
+        ? `segment-${selectedItem.trackId}-${selectedItem.segmentId}`
+        : `${selectedItem.type}-${selectedItem.id}`;
       const element = scrollContainerRef.current.querySelector(`[data-item-id="${itemId}"]`);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

@@ -54,7 +54,7 @@ const TILE_LAYERS = {
 };
 
 export function MapView() {
-  const { document, addWaypoint, addRoute, addTrack, selectItemsInBounds, deletePointsInBounds, selection, copySelected } = useGpxStore();
+  const { document, addWaypoint, addTrack, selectItemsInBounds, deletePointsInBounds, selection, copySelected } = useGpxStore();
   const { defaultTileLayer, trackColor } = useSettingsStore();
   const { editorMode, setEditorMode, setStatusMessage, hoveredItem } = useUIStore();
   const mapRef = useRef<LeafletMap | null>(null);
