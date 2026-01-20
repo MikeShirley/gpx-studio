@@ -155,8 +155,8 @@ function StatisticsPanel() {
       {/* Distance */}
       <StatGroup title="Distance">
         <StatItem label="Total" value={formatDistance(stats.distance)} />
-        <StatItem label="Climb" value={formatDistance(stats.climbDistance)} />
-        <StatItem label="Descent" value={formatDistance(stats.descentDistance)} />
+        <StatItem label="Uphill" value={formatDistance(stats.climbDistance)} />
+        <StatItem label="Downhill" value={formatDistance(stats.descentDistance)} />
       </StatGroup>
 
       {/* Time */}
@@ -175,8 +175,8 @@ function StatisticsPanel() {
 
       {/* Elevation */}
       <StatGroup title="Elevation">
-        <StatItem label="Total Climb" value={formatElevation(stats.totalClimb)} />
-        <StatItem label="Total Descent" value={formatElevation(stats.totalDescent)} />
+        <StatItem label="Gain" value={formatElevation(stats.totalClimb)} />
+        <StatItem label="Loss" value={formatElevation(stats.totalDescent)} />
         <StatItem label="Min" value={formatElevation(stats.minElevation)} />
         <StatItem label="Max" value={formatElevation(stats.maxElevation)} />
       </StatGroup>
